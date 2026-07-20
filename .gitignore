@@ -1,0 +1,43 @@
+# Секреты
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# База данных
+*.db
+*.sqlite
+*.sqlite3
+
+# Логи
+*.log
+logs/
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# Streamlit (кэш)
+.streamlit/
+
+# FastAPI
+*.db
+
+# OS
+.DS_Store
+Thumbs.db
