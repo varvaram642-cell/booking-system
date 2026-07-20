@@ -1,0 +1,22 @@
+# --- Основные ---
+aiogram==3.5.0
+asyncpg==0.29.0
+sqlalchemy==2.0.30
+python-dotenv==1.0.1
+pydantic==2.7.1
+psycopg2-binary==2.9.9
+
+# --- API ---
+fastapi==0.115.0
+uvicorn==0.30.0
+
+# --- Dashboard ---
+streamlit==1.36.0
+pandas==2.2.2
+plotly==5.22.0
+
+# --- Фоновые задачи ---
+apscheduler==3.10.4
+
+# --- Вспомогательные ---
+requests==2.32.3
