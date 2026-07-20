@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # ===== БАЗА ДАННЫХ =====
+  db:
+    image: postgres:15
+    container_name: booking_db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - booking_network
+
+  # ===== TELEGRAM БОТ =====
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    container_name: booking_bot
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      ADMIN_CHAT_ID: ${ADMIN_CHAT_ID}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    restart: unless-stopped
+    networks:
+      - booking_network
+
+  # ===== FASTAPI API =====
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: booking_api
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      SECRET_KEY: ${SECRET_KEY}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - booking_network
+
+  # ===== STREAMLIT ДАШБОРД =====
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: booking_dashboard   # ← ИСПРАВЛЕНО: добавлено!
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD_DASHBOARD}
+    ports:
+      - "8501:8501"
+    restart: unless-stopped
+    networks:
+      - booking_network
+
+networks:
+  booking_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
