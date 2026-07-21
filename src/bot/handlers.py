@@ -31,6 +31,7 @@ from .database import (
     Client, Booking, Service, Blacklist,
     today_local, now_local, LOCAL_TIMEZONE
 )
+from .booking_utils import get_free_slots  # <-- ЭТО НОВАЯ СТРОКА
 from .states import BookingStates, OperatorStates
 from .keyboards import (
     main_menu, services_menu, masters_menu, dates_menu, time_slots_menu,
@@ -41,7 +42,6 @@ from .keyboards import (
 logger = logging.getLogger(__name__)
 router = Router()
 BOOKING_DAYS_AHEAD = 14
-
 
 def get_session():
     return SessionLocal()
