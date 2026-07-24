@@ -2,11 +2,11 @@ import logging
 import os
 import re
 import sys
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta  # Добавлен timedelta
 from decimal import Decimal
 from typing import Optional, List
 
-from fastapi import Depends, FastAPI, HTTPException, status, Request
+from fastapi import Depends, FastAPI, HTTPException, status, Request, Query  # Добавлен Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -25,7 +25,8 @@ from bot.database import (
     now_local,
     ServiceMaster,
     Booking,
-    get_masters_for_service
+    get_masters_for_service,
+    get_available_dates  # Добавлен импорт для использования в /free-slots
 )
 from bot.booking_utils import get_free_slots
 
@@ -136,9 +137,9 @@ async def get_masters(service_id: Optional[int] = None, db: Session = Depends(ge
 
 @app.get("/api/free-slots", response_model=List[FreeSlotResponse], summary="Возвращает свободные слоты для мастера на выбранную услугу")
 async def get_free_slots_api(
-    master_id: int = Field(gt=0, description="ID мастера"),
-    service_id: int = Field(gt=0, description="ID услуги"),
-    days_ahead: int = Field(default=7, gt=0, le=30, description="Количество дней вперед для поиска слотов (макс. 30)"),
+    master_id: int = Query(..., gt=0, description="ID мастера"),
+    service_id: int = Query(..., gt=0, description="ID услуги"),
+    days_ahead: int = Query(7, gt=0, le=30, description="Количество дней вперед для поиска слотов (макс. 30)"),
     db: Session = Depends(get_db)
 ):
     service = get_service_by_id(db, service_id)
@@ -151,8 +152,6 @@ async def get_free_slots_api(
     
     if not master.is_active:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Мастер не активен или временно не принимает записи")
-    
-    from bot.database import get_available_dates
     
     today = now_local().date()
     result = []
