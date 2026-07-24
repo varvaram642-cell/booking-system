@@ -12,8 +12,6 @@ uvicorn==0.30.0
 
 # --- Dashboard ---
 streamlit==1.36.0
-pandas==2.2.2
-plotly==5.22.0
 
 # --- Фоновые задачи ---
 apscheduler==3.10.4
